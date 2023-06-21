@@ -1,4 +1,4 @@
-baseURL = 'https://dyingbleed.com/'
+baseURL = 'https://blog.dyingbleed.com/'
 languageCode = 'zh-cn'
 title = '李震的个人博客'
 theme = 'ananke'

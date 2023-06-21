@@ -1,0 +1,17 @@
+baseURL = 'https://dyingbleed.com/'
+languageCode = 'zh-cn'
+title = '李震的个人博客'
+theme = 'ananke'
+
+[params]
+  favicon = 'favicon.ico'
+
+[menu]
+[[menu.main]]
+name = 'Home'
+pageRef = '/'
+weight = 1
+[[menu.main]]
+name = 'About'
+pageRef = '/about'
+weight = 2

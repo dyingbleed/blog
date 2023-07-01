@@ -5,13 +5,27 @@ theme = 'ananke'
 
 [params]
   favicon = 'favicon.ico'
+  [[params.ananke_socials]]
+    name = 'github'
+    url = 'https://github.com/dyingbleed'
+
+[taxonomies]
+  tag = "tags"
 
 [menu]
-[[menu.main]]
-name = 'Home'
-pageRef = '/'
-weight = 1
-[[menu.main]]
-name = 'About'
-pageRef = '/about'
-weight = 2
+  [[menu.main]]
+    name = 'Home'
+    pageRef = '/'
+    weight = 1
+  [[menu.main]]
+    name = 'Posts'
+    pageRef = '/posts'
+    weight = 2
+  [[menu.main]]
+    name = 'Tags'
+    pageRef = '/tags'
+    weight = 3
+  [[menu.main]]
+    name = 'About'
+    pageRef = '/about'
+    weight = 4

@@ -6,47 +6,64 @@ categories: ["编程"]
 tags: ["cassandra"]
 ---
 
-# 开启 Cassandra CDC
+# Enable Cassandra CDC
 
-开启 Cassandra CDC 需要同时开启表级别 CDC 和节点级别 CDC
+To enable Cassandra CDC, need to enable both the table-level CDC and node level CDC.
 
-开启表级别 CDC，更新表属性 `cdc`：
+To enable table-level CDC, update the table option `cdc`：
 
 ```
 ALTER TABLE foo WITH cdc=true;
 ```
 
-开启节点级别 CDC，更新配置文件 `cassandra.yaml`：
+To enable node-level CDC, update the configuration file `cassandra.yaml`：
 
 ```
 cdc_enabled=true
 ```
 
-其他 CDC 相关配置：
+Other CDC options：
 
 - `cdc_raw_directory`
 - `cdc_total_space`
 - `cdc_free_space_check_interval`
 
-**WARNNING** 开启 Cassandra CDC 之后，当节点的 `cdc_total_space` 已满，Cassandra 会拒绝写入开启了 CDC 的表
+**WARNNING** If CDC is enabled, when fill up the `cdc_free_space_in_mb`, writes to CDC-enabled tables will be rejected.
 
-# Cassandra 3.11.X CDC 实现
-
-为了理解 Cassandra CDC, 需要对 [LSM-Tree (Wikipedia)](https://en.wikipedia.org/wiki/Log-structured_merge-tree) 有所了解
+# Cassandra 3.11.X CDC Implementation
 
 ![Cassandra LSM-Tree](https://dyingbleed-cn.oss-rg-china-mainland.aliyuncs.com/blog/cassandra_lsm-tree.jpg)
 
-Cassandra 的 memtable 是按表分配的，Cassandra 的 commitlog 是全局的并由多个 commitlog segment 文件组成
+Memtable is per table (or column family).
 
-每个 memtable 维护了 low commitlog position 指向该 memtable 所有记录对应 commitlog 的最小位置
+Commitlog is global, and consisted by commitlog segments.
 
-当满足 $last\\\_position_{segment} < \min(low\\\_segment\\\_position_{memtable})$ 条件，则 commitlog segment 可以被安全的作废
+Memtable maintain two positions:
 
-在 Cassandra 3.11.X 版本，作废的 commitlog segment 文件如果包含了 CDC 数据，就会从 `commitlog_directory` 目录移动到 `cdc_raw_directory` 目录，否则会被删除
+- `commitlogUpperBound` low commitlog position;
+- `commitlogLowerBound` high commitlog position;
+
+Commitlog segment maintain two hash maps:
+
+- `cfDirty` table (or column family) unflushed data interval;
+- `cfClean` table (or column family) flushed data interval;
+
+When keyspace apply new mutation:
+
+1. append mutation to commitlog
+2. commitlog segment update `cfDirty` table
+3. add partition update to memtable
+4. memtable update `comitlogUpperrBound`
+
+When flush memtable:
+
+1. iterate over active commitlog segments, mark clean using `commitlogUpperBound` and `commitlogLowerBound`
+
+In Cassandra 3.11.X version, if commitlog segment contains CDC-enabled table mutation, the commitlog segment will be moved from `commitlog_directory` to `cdc_raw_directory`.
 
 ![Commitlog](https://dyingbleed-cn.oss-rg-china-mainland.aliyuncs.com/blog/cassandra_3_cdc.jpg)
 
-# Cassandra 4.X CDC 实现
+# Cassandra 4.X CDC Improvement
 
 TBD
 

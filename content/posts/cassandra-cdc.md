@@ -55,13 +55,18 @@ When keyspace apply new mutation:
 3. add partition update to memtable
 4. memtable update `comitlogUpperrBound`
 
-When flush memtable:
-
-1. iterate over active commitlog segments, mark clean using `commitlogUpperBound` and `commitlogLowerBound`
+When flush memtable, all active commitlog segments will be iterated and marked clean using `commitlogUpperBound` and `commitlogLowerBound`. The commitlog segment is clean which means it can be discarded safely.
 
 In Cassandra 3.11.X version, if commitlog segment contains CDC-enabled table mutation, the commitlog segment will be moved from `commitlog_directory` to `cdc_raw_directory`.
 
 ![Commitlog](https://dyingbleed-cn.oss-rg-china-mainland.aliyuncs.com/blog/cassandra_3_cdc.jpg)
+
+Because the commitlog is marked clean is controlled by memtable flush, the time when the commitlog can be visible to CDC is indeterminate. It leads to the following problems of Cassandra CDC in Cassandra 3.11.X version:
+
+- latency
+- out of order
+
+We can ease the problems by tuning the memtable flush, but it does not solve them fundamentally. 
 
 # Cassandra 4.X CDC Improvement
 

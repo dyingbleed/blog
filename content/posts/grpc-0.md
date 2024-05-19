@@ -2,7 +2,7 @@
 title: "gPRC 学习笔记（一）：第一个 gPRC 服务"
 date: 2023-06-28T21:49:59+08:00
 draft: false
-categories: ["编程"]
+categories: ["dev"]
 tags: ["go"]
 ---
 
